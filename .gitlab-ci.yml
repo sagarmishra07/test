@@ -1,0 +1,33 @@
+build site:
+  only:
+    - master
+  image: node:14
+  stage: build
+  script:
+    - npm install
+    - npm install -g @quasar/cli
+    - quasar clean
+    - quasar build -m pwa
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - dist
+
+#unit test:
+#  image: node:6
+#  stage: test
+#  script:
+#    - npm install --progress=false
+#    - npm run unit
+
+image: ubuntu:18.04
+
+before_script:
+  - apt-get update -qy
+  - apt-get install -y lftp
+
+build:
+  script:
+    - lftp -e "set ftp:ssl-allow no; set ssl:verify-certificate no; open ftp.fishte.com; user rosanyonghang@fishte.com 1@mwatiaM; mirror -X .* -X .*/ --reverse --verbose --delete dist/pwa pharmacy.ktmbees.com; bye"
+  only:
+    - master
